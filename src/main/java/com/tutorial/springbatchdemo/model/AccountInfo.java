@@ -1,0 +1,39 @@
+package com.tutorial.springbatchdemo.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Entity
+@Table(name = "account_info")
+public class AccountInfo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "from_account")
+    private String fromAccount;
+
+    @Column(name = "to_account")
+    private String toAccount;
+
+    @Column(name = "amount")
+    private Double amount;
+
+    @Column(name = "date")
+    private Date date;
+
+    @Column(name = "operation")
+    private Integer operation;
+
+
+}
