@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class StepDepositConfig {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
-    @Bean
+    @Bean("transactionLogStep")
     public Step step(JdbcCursorItemReader<TransactionLog> cursorItemReader,
                      ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
                      ItemWriter<AccountInfo> itemWriter) {

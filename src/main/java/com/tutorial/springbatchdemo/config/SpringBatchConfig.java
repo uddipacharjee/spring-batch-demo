@@ -1,8 +1,10 @@
 package com.tutorial.springbatchdemo.config;
 
+import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import com.tutorial.springbatchdemo.model.TransactionRowMapper;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -10,6 +12,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,8 +23,6 @@ import javax.sql.DataSource;
 public class SpringBatchConfig {
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
-
-
 
     @Autowired
     private DataSource dataSource;
@@ -45,15 +46,19 @@ public class SpringBatchConfig {
         };
     }
 
-
+    @Bean("jobCompletionListener")
+    public JobExecutionListener jobCompletionListener(){
+        return new JobCompletionNotificationListener();
+    }
 
 
     @Bean
-    public Job job(Step step){
+    public Job job(@Qualifier("transactionLogStep") Step transactionLogStep){
 
         return jobBuilderFactory.get("Transaction")
                 .incrementer(new RunIdIncrementer())
-                .start(step)
+                .listener(jobCompletionListener())
+                .start(transactionLogStep)
                 .build();
     }
 
