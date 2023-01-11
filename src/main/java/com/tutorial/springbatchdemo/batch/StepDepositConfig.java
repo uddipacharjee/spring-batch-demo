@@ -21,7 +21,7 @@ public class StepDepositConfig {
                      ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
                      @Qualifier("accountInfoJDBCWriter") ItemWriter<AccountInfo> itemWriter) {
         return stepBuilderFactory.get("Txn-Log")
-                .<TransactionLog, AccountInfo>chunk(1000)
+                .<TransactionLog, AccountInfo>chunk(10000)
                 .reader(cursorItemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)
