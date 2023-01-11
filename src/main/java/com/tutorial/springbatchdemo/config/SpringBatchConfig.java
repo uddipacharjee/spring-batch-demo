@@ -1,6 +1,7 @@
 package com.tutorial.springbatchdemo.config;
 
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
+import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import com.tutorial.springbatchdemo.model.TransactionRowMapper;
 import org.springframework.batch.core.Job;
@@ -10,7 +11,10 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -51,14 +55,26 @@ public class SpringBatchConfig {
         return new JobCompletionNotificationListener();
     }
 
+    @Bean("accountInfoJDBCWriter")
+    public JdbcBatchItemWriter<AccountInfo> writer(DataSource dataSource) {
+        return new JdbcBatchItemWriterBuilder<AccountInfo>()
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
+                .sql("INSERT INTO account_info (operation,from_account,to_account,amount,date) " +
+                        "VALUES (:operation, :fromAccount,:toAccount,:amount,:date)")
+                .dataSource(dataSource)
+                .build();
+    }
+
 
     @Bean
-    public Job job(@Qualifier("transactionLogStep") Step transactionLogStep){
+    public Job job(@Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+                   @Qualifier("transactionLogStep") Step transactionLogStep){
 
         return jobBuilderFactory.get("Transaction")
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
-                .start(transactionLogStep)
+                .start(randomGeneratorStep)
+                .next(transactionLogStep)
                 .build();
     }
 

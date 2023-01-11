@@ -8,6 +8,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,12 +19,19 @@ public class StepDepositConfig {
     @Bean("transactionLogStep")
     public Step step(JdbcCursorItemReader<TransactionLog> cursorItemReader,
                      ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
-                     ItemWriter<AccountInfo> itemWriter) {
+                     @Qualifier("accountInfoJDBCWriter") ItemWriter<AccountInfo> itemWriter) {
         return stepBuilderFactory.get("Txn-Log")
-                .<TransactionLog, AccountInfo>chunk(5)
+                .<TransactionLog, AccountInfo>chunk(1000)
                 .reader(cursorItemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)
+                .build();
+    }
+
+    @Bean("randomGeneratorStep")
+    public Step step(RandomGeneratorTasklet generatorTasklet) {
+        return stepBuilderFactory.get("Random-Gen")
+                .tasklet(generatorTasklet)
                 .build();
     }
 }

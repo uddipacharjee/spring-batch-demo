@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+@Component("accountInfoJpaWriter")
 @Slf4j
 public class DBWriter implements ItemWriter<AccountInfo> {
     @Autowired

@@ -3,7 +3,7 @@ package com.tutorial.springbatchdemo.model.enums;
 import java.util.HashMap;
 
 public enum OperationEnum {
-    RECHARGE(1),CLAIM(2);
+    RECHARGE(1),CLAIM(2),PURCHASE(3);
     private final Integer value;
 
     private static final HashMap<Integer, OperationEnum> map = new HashMap<>();

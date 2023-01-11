@@ -18,7 +18,7 @@ import java.util.Date;
 public class TransactionLog {
     @Id
     @Column(name = "txn_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long txnId;
 
     @Column(name = "date")

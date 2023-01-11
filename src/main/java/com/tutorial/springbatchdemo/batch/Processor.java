@@ -33,6 +33,9 @@ public class Processor implements ItemProcessor<TransactionLog, AccountInfo> {
         } else if (Objects.equals(item.getOperation(), OperationEnum.CLAIM.getValue())) {
             fromAcc = "SALE_DEPOSIT";
             toAcc = "RETAILER";
+        } else if (Objects.equals(item.getOperation(), OperationEnum.PURCHASE.getValue())) {
+            fromAcc = "CUSTOMER";
+            toAcc = "SALE_DEPOSIT";
         }
 
         AccountInfo accountInfo = AccountInfo.builder()
