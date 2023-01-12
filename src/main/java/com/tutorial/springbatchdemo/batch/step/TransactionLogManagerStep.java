@@ -7,7 +7,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -20,12 +22,16 @@ public class TransactionLogManagerStep {
     @Bean("transactionLogStep")
     public Step step(@Qualifier("transactionLogCursorItemReader") JdbcCursorItemReader<TransactionLog> cursorItemReader,
                      @Qualifier("transactionLogProcessor") ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
-                     @Qualifier("accountInfoJDBCWriter") ItemWriter<AccountInfo> itemWriter) {
+                     //@Qualifier("accountInfoJDBCWriter") ItemWriter<AccountInfo> itemWriter,
+                     //@Qualifier("txnStatusUpdateJDBCWriter") JdbcBatchItemWriter<AccountInfo> itemUpdater
+                     @Qualifier("compositeItemWriter") CompositeItemWriter<AccountInfo> compositeItemWriter
+
+    ) {
         return stepBuilderFactory.get("Txn-Log")
                 .<TransactionLog, AccountInfo>chunk(10000)
                 .reader(cursorItemReader)
                 .processor(itemProcessor)
-                .writer(itemWriter)
+                .writer(compositeItemWriter)
                 .build();
     }
 

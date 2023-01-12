@@ -32,4 +32,7 @@ public class TransactionLog {
 
     @Column(name = "amount")
     private Double amount;
+
+    @Column(name = "status")
+    private String status;
 }

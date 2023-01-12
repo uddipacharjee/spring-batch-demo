@@ -42,6 +42,7 @@ public class RandomGeneratorTasklet implements Tasklet, StepExecutionListener {
                     .operation(ops[random.nextInt(3)])
                     .date(new Date())
                     .amount((double)random.nextInt(1000)+15000L)
+                    .status("00")
                     .build();
             txnLogList.add(txnLog);
         }

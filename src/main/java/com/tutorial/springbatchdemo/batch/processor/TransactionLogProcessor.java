@@ -39,6 +39,7 @@ public class TransactionLogProcessor implements ItemProcessor<TransactionLog, Ac
 
         AccountInfo accountInfo = AccountInfo.builder()
                 .operation(item.getOperation())
+                .transactionId(item.getTxnId())
                 .fromAccount(fromAcc)
                 .toAccount(toAcc)
                 .amount(item.getAmount())

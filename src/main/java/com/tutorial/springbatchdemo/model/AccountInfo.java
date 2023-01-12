@@ -20,6 +20,9 @@ public class AccountInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "txn_id", nullable = false)
+    private Long transactionId;
+
     @Column(name = "from_account")
     private String fromAccount;
 
