@@ -1,4 +1,4 @@
-package com.tutorial.springbatchdemo.batch;
+package com.tutorial.springbatchdemo.batch.writer;
 
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.repository.AccountInfoRepository;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component("accountInfoJpaWriter")
 @Slf4j
-public class DBWriter implements ItemWriter<AccountInfo> {
+public class AccountInfoJpaWriter implements ItemWriter<AccountInfo> {
     @Autowired
     private AccountInfoRepository accountInfoRepository;
     @Override

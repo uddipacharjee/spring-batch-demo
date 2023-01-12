@@ -1,4 +1,4 @@
-package com.tutorial.springbatchdemo.batch;
+package com.tutorial.springbatchdemo.batch.processor;
 
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.TransactionLog;
@@ -10,14 +10,13 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-@Component
 @Slf4j
-public class Processor implements ItemProcessor<TransactionLog, AccountInfo> {
+@Component("transactionLogProcessor")
+public class TransactionLogProcessor implements ItemProcessor<TransactionLog, AccountInfo> {
 
     private static final Map<Integer, String> OPERATION = new HashMap<>();
 
-    public Processor(){
+    public TransactionLogProcessor(){
 
     }
 

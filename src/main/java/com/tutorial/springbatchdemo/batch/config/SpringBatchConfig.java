@@ -1,4 +1,4 @@
-package com.tutorial.springbatchdemo.config;
+package com.tutorial.springbatchdemo.batch.config;
 
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.AccountInfo;
@@ -30,8 +30,8 @@ public class SpringBatchConfig {
 
     @Autowired
     private DataSource dataSource;
-    @Bean
-    public JdbcCursorItemReader<TransactionLog> cursorItemReader(){
+    @Bean("transactionLogCursorItemReader")
+    public JdbcCursorItemReader<TransactionLog> transactionLogCursorItemReader(){
         JdbcCursorItemReader<TransactionLog> reader = new JdbcCursorItemReader<>();
         reader.setSql("SELECT txn_id, date, operation, user_name,amount FROM txn_log");
         reader.setDataSource(dataSource);
@@ -41,22 +41,13 @@ public class SpringBatchConfig {
         return reader;
     }
 
-    @Bean
-    public ItemWriter<TransactionLog> customerItemWriter(){
-        return items -> {
-            for(TransactionLog c : items) {
-                System.out.println(c.toString());
-            }
-        };
-    }
-
     @Bean("jobCompletionListener")
     public JobExecutionListener jobCompletionListener(){
         return new JobCompletionNotificationListener();
     }
 
     @Bean("accountInfoJDBCWriter")
-    public JdbcBatchItemWriter<AccountInfo> writer(DataSource dataSource) {
+    public JdbcBatchItemWriter<AccountInfo> accountInfoJDBCWriter(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<AccountInfo>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
                 .sql("INSERT INTO account_info (operation,from_account,to_account,amount,date) " +
@@ -66,8 +57,9 @@ public class SpringBatchConfig {
     }
 
 
-    @Bean
-    public Job job(@Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+    @Bean("transactionLogHandlerJob")
+    public Job transactionLogHandlerJob(
+                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
                    @Qualifier("transactionLogStep") Step transactionLogStep){
 
         return jobBuilderFactory.get("Transaction")

@@ -1,4 +1,4 @@
-package com.tutorial.springbatchdemo.batch;
+package com.tutorial.springbatchdemo.batch.tasklet;
 
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import com.tutorial.springbatchdemo.repository.TransactionRepository;

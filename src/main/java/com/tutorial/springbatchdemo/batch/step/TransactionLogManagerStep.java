@@ -1,5 +1,6 @@
-package com.tutorial.springbatchdemo.batch;
+package com.tutorial.springbatchdemo.batch.step;
 
+import com.tutorial.springbatchdemo.batch.tasklet.RandomGeneratorTasklet;
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import org.springframework.batch.core.Step;
@@ -13,12 +14,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StepDepositConfig {
+public class TransactionLogManagerStep {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
     @Bean("transactionLogStep")
-    public Step step(JdbcCursorItemReader<TransactionLog> cursorItemReader,
-                     ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
+    public Step step(@Qualifier("transactionLogCursorItemReader") JdbcCursorItemReader<TransactionLog> cursorItemReader,
+                     @Qualifier("transactionLogProcessor") ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
                      @Qualifier("accountInfoJDBCWriter") ItemWriter<AccountInfo> itemWriter) {
         return stepBuilderFactory.get("Txn-Log")
                 .<TransactionLog, AccountInfo>chunk(1000)

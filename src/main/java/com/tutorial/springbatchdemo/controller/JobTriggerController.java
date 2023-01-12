@@ -6,6 +6,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ public class JobTriggerController {
 
 
     @Autowired
-    private Job job;
+    private @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob;
 
     @GetMapping
     public void load() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
@@ -28,7 +29,7 @@ public class JobTriggerController {
                 .addLong("time", System.currentTimeMillis()).toJobParameters();
 
 
-        JobExecution execution = jobLauncher.run(job, jobParameters);
+        JobExecution execution = jobLauncher.run(transactionLogHandlerJob, jobParameters);
         System.out.println("STATUS :: " + execution.getStatus());
     }
 }
