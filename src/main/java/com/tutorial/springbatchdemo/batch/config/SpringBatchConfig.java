@@ -4,12 +4,14 @@ import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import com.tutorial.springbatchdemo.model.TransactionRowMapper;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
@@ -42,16 +44,17 @@ public class SpringBatchConfig {
     }
 
     @Bean("jobCompletionListener")
-    public JobExecutionListener jobCompletionListener(){
+    public JobExecutionListener jobCompletionListener() {
         return new JobCompletionNotificationListener();
     }
 
     @Bean("accountInfoJDBCWriter")
     public JdbcBatchItemWriter<AccountInfo> accountInfoJDBCWriter(DataSource dataSource) {
+        String sql = "INSERT INTO account_info (operation,from_account,to_account,amount,date) " +
+                "VALUES (:operation, :fromAccount,:toAccount,:amount,:date)";
         return new JdbcBatchItemWriterBuilder<AccountInfo>()
-                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO account_info (operation,from_account,to_account,amount,date) " +
-                        "VALUES (:operation, :fromAccount,:toAccount,:amount,:date)")
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AccountInfo>())
+                .sql(sql)
                 .dataSource(dataSource)
                 .build();
     }
@@ -69,8 +72,4 @@ public class SpringBatchConfig {
                 .next(transactionLogStep)
                 .build();
     }
-
-
-
-
 }
