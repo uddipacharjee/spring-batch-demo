@@ -11,9 +11,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Date;
-
+@Configuration
 @SpringBootApplication()
 public class SpringBatchDemoApplication {
 
@@ -24,7 +25,7 @@ public class SpringBatchDemoApplication {
     @Bean
     CommandLineRunner run(
             @Autowired JobLauncher jobLauncher,
-            @Qualifier("transactionLogHandlerJob") Job job
+            @Qualifier("transactionLogHandlerJobWithDecider") Job job
     ) {
         return args -> {
             JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())

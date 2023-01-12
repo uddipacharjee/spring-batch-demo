@@ -20,8 +20,21 @@ public class JobTriggerController {
     private JobLauncher jobLauncher;
 
 
-    @Autowired
-    private @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob;
+//    @Autowired
+//    private @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob;
+//
+//    @GetMapping
+//    public void load() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+//        JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())
+//                .addLong("time", System.currentTimeMillis()).toJobParameters();
+//
+//
+//        JobExecution execution = jobLauncher.run(transactionLogHandlerJob, jobParameters);
+//        System.out.println("STATUS :: " + execution.getStatus());
+//    }
+
+        @Autowired
+    private @Qualifier("transactionLogHandlerJobWithDecider") Job transactionLogHandlerJob;
 
     @GetMapping
     public void load() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {

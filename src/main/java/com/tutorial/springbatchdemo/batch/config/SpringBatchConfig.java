@@ -1,5 +1,6 @@
 package com.tutorial.springbatchdemo.batch.config;
 
+import com.tutorial.springbatchdemo.batch.decider.TransactionLogExecutionDecider;
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.TransactionLog;
@@ -10,6 +11,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
@@ -26,6 +28,7 @@ import javax.sql.DataSource;
 public class SpringBatchConfig {
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
+
 
     @Autowired
     private DataSource dataSource;
@@ -57,16 +60,38 @@ public class SpringBatchConfig {
     }
 
 
-    @Bean("transactionLogHandlerJob")
-    public Job transactionLogHandlerJob(
-                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
-                   @Qualifier("transactionLogStep") Step transactionLogStep){
+//    @Bean("transactionLogHandlerJob")
+//    public Job transactionLogHandlerJob(
+//                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+//                   @Qualifier("transactionLogStep") Step transactionLogStep){
+//
+//        return jobBuilderFactory.get("Transaction")
+//                .incrementer(new RunIdIncrementer())
+//                .listener(jobCompletionListener())
+//                .start(randomGeneratorStep)
+//                .next(transactionLogStep)
+//                .build();
+//    }
+
+    @Bean("transactionLogHandlerJobWithDecider")
+    public Job transactionLogHandlerJobWithDecider(
+            TransactionLogExecutionDecider transactionLogExecutionDecider,
+            @Qualifier("initStep") Step initStep,
+            @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+            @Qualifier("transactionLogStep") Step transactionLogStep){
 
         return jobBuilderFactory.get("Transaction")
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
-                .start(randomGeneratorStep)
-                .next(transactionLogStep)
+                .start(initStep)
+                .next(transactionLogExecutionDecider)
+                .on("YES")
+                .to(randomGeneratorStep)
+                .from(transactionLogExecutionDecider)
+                .on("*")
+                .to(transactionLogStep)
+                .end()
                 .build();
     }
+
 }
