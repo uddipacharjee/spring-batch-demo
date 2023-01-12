@@ -24,7 +24,7 @@ public class SpringBatchDemoApplication {
     @Bean
     CommandLineRunner run(
             @Autowired JobLauncher jobLauncher,
-            @Qualifier("jobTxnProcessor") Job job
+            @Qualifier("transactionLogHandlerJob") Job job
     ) {
         return args -> {
             JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())
