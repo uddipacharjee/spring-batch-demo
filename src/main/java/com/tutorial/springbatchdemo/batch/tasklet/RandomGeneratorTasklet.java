@@ -30,27 +30,31 @@ import java.util.Random;
 public class RandomGeneratorTasklet implements Tasklet, StepExecutionListener {
 
     private final TransactionRepository transactionRepository;
-    @Value("#{jobParameters['numberOfData']}")
-    String numberOfData;
+    private Long numberOfData;
     @Override
     public void beforeStep(StepExecution stepExecution) {
 
-        //numberOfData = (String) stepExecution.getJobExecution().getExecutionContext().get("numberOfData");
+        String numberOfDataStr = stepExecution.getJobExecution().getJobParameters().getString("numberOfData");
 
+        if(numberOfDataStr != null){
+            numberOfData = Long.parseLong(numberOfDataStr);
+        }else {
+            numberOfData = 1000L;
+        }
         log.info("Random Generator tasklet starts ,{}",numberOfData);
     }
 
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        numberOfData = chunkContext.getStepContext().getStepExecution()
-                .getJobParameters().getString("numberOfData");
+//        numberOfData = chunkContext.getStepContext().getStepExecution()
+//                .getJobParameters().getString("numberOfData");
         log.info("Number of Data {} ",numberOfData);
         Random random = new Random();
         String[] names = {"USER-A","USER-B","USER-c"};
         int[] ops = {1,2,3};
         List<TransactionLog> txnLogList = new ArrayList<>();
-        for(int i=0; i< Integer.parseInt(numberOfData); i++){
+        for(int i=0; i< numberOfData; i++){
             TransactionLog txnLog = TransactionLog.builder()
                     .userName(names[random.nextInt(3)])
                     .operation(ops[random.nextInt(3)])

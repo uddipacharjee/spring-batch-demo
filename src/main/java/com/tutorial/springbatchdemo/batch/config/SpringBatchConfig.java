@@ -60,18 +60,18 @@ public class SpringBatchConfig {
     }
 
 
-//    @Bean("transactionLogHandlerJob")
-//    public Job transactionLogHandlerJob(
-//                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
-//                   @Qualifier("transactionLogStep") Step transactionLogStep){
-//
-//        return jobBuilderFactory.get("Transaction")
-//                .incrementer(new RunIdIncrementer())
-//                .listener(jobCompletionListener())
-//                .start(randomGeneratorStep)
-//                .next(transactionLogStep)
-//                .build();
-//    }
+    @Bean("transactionLogHandlerJob")
+    public Job transactionLogHandlerJob(
+                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+                   @Qualifier("transactionLogStep") Step transactionLogStep){
+
+        return jobBuilderFactory.get("Transaction-001")
+                .incrementer(new RunIdIncrementer())
+                .listener(jobCompletionListener())
+                .start(randomGeneratorStep)
+                .next(transactionLogStep)
+                .build();
+    }
 
     @Bean("transactionLogHandlerJobWithDecider")
     public Job transactionLogHandlerJobWithDecider(
@@ -80,16 +80,13 @@ public class SpringBatchConfig {
             @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
             @Qualifier("transactionLogStep") Step transactionLogStep){
 
-        return jobBuilderFactory.get("Transaction")
+        return jobBuilderFactory.get("Transaction-002")
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
-                .start(initStep)
-                .next(transactionLogExecutionDecider)
-                .on("YES")
-                .to(randomGeneratorStep)
-                .from(transactionLogExecutionDecider)
-                .on("*")
-                .to(transactionLogStep)
+                .flow(initStep)
+                .next(transactionLogExecutionDecider).on("YES").to(randomGeneratorStep)
+                .from(transactionLogExecutionDecider).on("*").to(transactionLogStep)
+                .next(transactionLogStep)
                 .end()
                 .build();
     }
