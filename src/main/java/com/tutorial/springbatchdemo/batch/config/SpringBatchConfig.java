@@ -31,8 +31,9 @@ public class SpringBatchConfig {
 
     @Autowired
     private DataSource dataSource;
+
     @Bean("transactionLogCursorItemReader")
-    public JdbcCursorItemReader<TransactionLog> transactionLogCursorItemReader(){
+    public JdbcCursorItemReader<TransactionLog> transactionLogCursorItemReader() {
         JdbcCursorItemReader<TransactionLog> reader = new JdbcCursorItemReader<>();
         reader.setSql("SELECT txn_id, date, operation, user_name,amount, status FROM txn_log" +
                 " where status = '00'");
@@ -70,23 +71,45 @@ public class SpringBatchConfig {
     }
 
     @Bean("compositeItemWriter")
-    public CompositeItemWriter<AccountInfo> compositeItemWriter(DataSource dataSource){
+    public CompositeItemWriter<AccountInfo> compositeItemWriter(DataSource dataSource) {
         CompositeItemWriter writer = new CompositeItemWriter();
-        writer.setDelegates(Arrays.asList(accountInfoJDBCWriter(dataSource),txnStatusUpdateJDBCWriter(dataSource)));
+        writer.setDelegates(Arrays.asList(accountInfoJDBCWriter(dataSource), txnStatusUpdateJDBCWriter(dataSource)));
         return writer;
     }
 
 
     @Bean("transactionLogHandlerJob")
     public Job transactionLogHandlerJob(
-                   @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
-                   @Qualifier("transactionLogStep") Step transactionLogStep){
+            @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
+            @Qualifier("transactionLogStep") Step transactionLogStep) {
 
         return jobBuilderFactory.get("Transaction")
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
                 .start(randomGeneratorStep)
                 .next(transactionLogStep)
+                .build();
+    }
+
+    @Bean("randTransactionGenJob")
+    public Job randTransactionGenJob(
+            @Qualifier("randomGeneratorStep") Step randomGeneratorStep) {
+
+        return jobBuilderFactory.get("genTransactionRandom")
+                .incrementer(new RunIdIncrementer())
+                .listener(jobCompletionListener())
+                .start(randomGeneratorStep)
+                .build();
+    }
+
+    @Bean("randTransactionProcessJob")
+    public Job randTransactionProcessJob(
+            @Qualifier("transactionLogStep") Step transactionLogStep) {
+
+        return jobBuilderFactory.get("processTransaction")
+                .incrementer(new RunIdIncrementer())
+                .listener(jobCompletionListener())
+                .start(transactionLogStep)
                 .build();
     }
 }

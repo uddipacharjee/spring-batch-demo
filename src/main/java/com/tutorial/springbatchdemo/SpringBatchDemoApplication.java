@@ -1,5 +1,6 @@
 package com.tutorial.springbatchdemo;
 
+import com.tutorial.springbatchdemo.model.enums.JobType;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -24,14 +25,31 @@ public class SpringBatchDemoApplication {
     @Bean
     CommandLineRunner run(
             @Autowired JobLauncher jobLauncher,
-            @Qualifier("transactionLogHandlerJob") Job job
+            @Qualifier("randTransactionGenJob") Job randTransactionGenJob,
+            @Qualifier("randTransactionProcessJob") Job randTransactionProcessJob,
+            @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob
     ) {
         return args -> {
             JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())
                     .addLong("time", System.currentTimeMillis()).toJobParameters();
 
+            JobType type = JobType.getByStrValue(args[0]);
+            Job launchableJob = transactionLogHandlerJob;
 
-            JobExecution execution = jobLauncher.run(job, jobParameters);
+            switch (type) {
+                case TR_GEN:
+                    launchableJob = randTransactionGenJob;
+                    break;
+                case TR_PROCESS:
+                    launchableJob = randTransactionProcessJob;
+                    break;
+                case TR_GEN_AND_PROCESS:
+                    launchableJob = transactionLogHandlerJob;
+                    break;
+                default:
+                    break;
+            }
+            JobExecution execution = jobLauncher.run(launchableJob, jobParameters);
             System.out.println("STATUS :: " + execution.getStatus());
         };
     }

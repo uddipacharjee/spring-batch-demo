@@ -28,7 +28,7 @@ public class TransactionLogManagerStep {
 
     ) {
         return stepBuilderFactory.get("Txn-Log")
-                .<TransactionLog, AccountInfo>chunk(10000)
+                .<TransactionLog, AccountInfo>chunk(1000)
                 .reader(cursorItemReader)
                 .processor(itemProcessor)
                 .writer(compositeItemWriter)
