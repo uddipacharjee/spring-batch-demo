@@ -22,35 +22,35 @@ public class SpringBatchDemoApplication {
         SpringApplication.run(SpringBatchDemoApplication.class, args);
     }
 
-    @Bean
-    CommandLineRunner run(
-            @Autowired JobLauncher jobLauncher,
-            @Qualifier("randTransactionGenJob") Job randTransactionGenJob,
-            @Qualifier("randTransactionProcessJob") Job randTransactionProcessJob,
-            @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob
-    ) {
-        return args -> {
-            JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())
-                    .addLong("time", System.currentTimeMillis()).toJobParameters();
-
-            JobType type = JobType.getByStrValue(args[0]);
-            Job launchableJob = transactionLogHandlerJob;
-
-            switch (type) {
-                case TR_GEN:
-                    launchableJob = randTransactionGenJob;
-                    break;
-                case TR_PROCESS:
-                    launchableJob = randTransactionProcessJob;
-                    break;
-                case TR_GEN_AND_PROCESS:
-                    launchableJob = transactionLogHandlerJob;
-                    break;
-                default:
-                    break;
-            }
-            JobExecution execution = jobLauncher.run(launchableJob, jobParameters);
-            System.out.println("STATUS :: " + execution.getStatus());
-        };
-    }
+//    @Bean
+//    CommandLineRunner run(
+//            @Autowired JobLauncher jobLauncher,
+//            @Qualifier("randTransactionGenJob") Job randTransactionGenJob,
+//            @Qualifier("randTransactionProcessJob") Job randTransactionProcessJob,
+//            @Qualifier("transactionLogHandlerJob") Job transactionLogHandlerJob
+//    ) {
+//        return args -> {
+//            JobParameters jobParameters = new JobParametersBuilder().addDate("date", new Date())
+//                    .addLong("time", System.currentTimeMillis()).toJobParameters();
+//
+//            JobType type = JobType.getByStrValue(args[0]);
+//            Job launchableJob = transactionLogHandlerJob;
+//
+//            switch (type) {
+//                case TR_GEN:
+//                    launchableJob = randTransactionGenJob;
+//                    break;
+//                case TR_PROCESS:
+//                    launchableJob = randTransactionProcessJob;
+//                    break;
+//                case TR_GEN_AND_PROCESS:
+//                    launchableJob = transactionLogHandlerJob;
+//                    break;
+//                default:
+//                    break;
+//            }
+//            JobExecution execution = jobLauncher.run(launchableJob, jobParameters);
+//            System.out.println("STATUS :: " + execution.getStatus());
+//        };
+//    }
 }

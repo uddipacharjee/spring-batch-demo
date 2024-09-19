@@ -1,33 +1,54 @@
 package com.tutorial.springbatchdemo.batch.config;
 
+import com.tutorial.springbatchdemo.batch.processor.StudentProcessor;
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.AccountInfo;
+import com.tutorial.springbatchdemo.model.Student;
 import com.tutorial.springbatchdemo.model.TransactionLog;
 import com.tutorial.springbatchdemo.model.TransactionRowMapper;
+import com.tutorial.springbatchdemo.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.LineMapper;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
-@EnableBatchProcessing
+//@EnableBatchProcessing
+@RequiredArgsConstructor
 public class SpringBatchConfig {
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    //@Autowired
+    //private JobBuilderFactory jobBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager platformTransactionManager;
+    private final StudentRepository repository;
+
 
     @Autowired
     private DataSource dataSource;
@@ -83,7 +104,7 @@ public class SpringBatchConfig {
             @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
             @Qualifier("transactionLogStep") Step transactionLogStep) {
 
-        return jobBuilderFactory.get("Transaction")
+        return new JobBuilder("Transaction",jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
                 .start(randomGeneratorStep)
@@ -95,7 +116,7 @@ public class SpringBatchConfig {
     public Job randTransactionGenJob(
             @Qualifier("randomGeneratorStep") Step randomGeneratorStep) {
 
-        return jobBuilderFactory.get("genTransactionRandom")
+        return new JobBuilder("genTransactionRandom",jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
                 .start(randomGeneratorStep)
@@ -106,10 +127,83 @@ public class SpringBatchConfig {
     public Job randTransactionProcessJob(
             @Qualifier("transactionLogStep") Step transactionLogStep) {
 
-        return jobBuilderFactory.get("processTransaction")
+//        return jobBuilderFactory.get("processTransaction")
+//                .incrementer(new RunIdIncrementer())
+//                .listener(jobCompletionListener())
+//                .start(transactionLogStep)
+//                .build();
+        return new JobBuilder("processTransaction",jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(jobCompletionListener())
                 .start(transactionLogStep)
                 .build();
     }
+
+    @Bean
+    public FlatFileItemReader<Student> reader() {
+        FlatFileItemReader<Student> itemReader = new FlatFileItemReader<>();
+        itemReader.setResource(new FileSystemResource("src/main/resources/students.csv"));
+        itemReader.setName("csvReader");
+        itemReader.setLinesToSkip(1);
+        itemReader.setLineMapper(lineMapper());
+        return itemReader;
+    }
+
+    @Bean
+    public StudentProcessor processor() {
+        return new StudentProcessor();
+    }
+
+
+    @Bean
+    public RepositoryItemWriter<Student> writer() {
+        RepositoryItemWriter<Student> writer = new RepositoryItemWriter<>();
+        writer.setRepository(repository);
+        writer.setMethodName("save");
+        return writer;
+    }
+
+    @Bean
+    public Step step1() {
+        return new StepBuilder("csvImport", jobRepository)
+                .<Student, Student>chunk(1000, platformTransactionManager)
+                .reader(reader())
+                .processor(processor())
+                .writer(writer())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean("studentJob")
+    public Job runJob() {
+        return new JobBuilder("importStudents", jobRepository)
+                .start(step1())
+                .build();
+
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor();
+        asyncTaskExecutor.setConcurrencyLimit(10);
+        return asyncTaskExecutor;
+    }
+
+    private LineMapper<Student> lineMapper() {
+        DefaultLineMapper<Student> lineMapper = new DefaultLineMapper<>();
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setStrict(false);
+        lineTokenizer.setNames("id", "firstName", "lastName", "age");
+
+        BeanWrapperFieldSetMapper<Student> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(Student.class);
+
+        lineMapper.setLineTokenizer(lineTokenizer);
+        lineMapper.setFieldSetMapper(fieldSetMapper);
+        return lineMapper;
+    }
+
+
 }
