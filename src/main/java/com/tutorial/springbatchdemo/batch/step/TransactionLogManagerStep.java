@@ -20,6 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TransactionLogManagerStep {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
+
     @Bean("transactionLogStep")
     public Step runStep(@Qualifier("transactionLogCursorItemReader") JdbcCursorItemReader<TransactionLog> cursorItemReader,
                      @Qualifier("transactionLogProcessor") ItemProcessor<TransactionLog, AccountInfo> itemProcessor,
