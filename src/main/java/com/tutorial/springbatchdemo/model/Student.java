@@ -14,6 +14,7 @@ public class Student {
     @Id
     @GeneratedValue
     private Integer id;
+    private String uid;
     private String firstname;
     private String lastname;
     private int age;

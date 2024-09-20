@@ -1,6 +1,7 @@
 package com.tutorial.springbatchdemo.batch.config;
 
 import com.tutorial.springbatchdemo.batch.processor.StudentProcessor;
+import com.tutorial.springbatchdemo.listener.CustomStepExecutionListener;
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.AccountInfo;
 import com.tutorial.springbatchdemo.model.Student;
@@ -11,11 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -29,6 +30,8 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.transform.FixedLengthTokenizer;
+import org.springframework.batch.item.file.transform.Range;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,6 +75,11 @@ public class SpringBatchConfig {
     @Bean("jobCompletionListener")
     public JobExecutionListener jobCompletionListener() {
         return new JobCompletionNotificationListener();
+    }
+
+    @Bean("stepCompletionListener")
+    public StepExecutionListener stepCompletionListener() {
+        return new CustomStepExecutionListener();
     }
 
     @Bean("accountInfoJDBCWriter")
@@ -199,7 +207,7 @@ public class SpringBatchConfig {
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setStrict(false);
-        lineTokenizer.setNames("id", "firstName", "lastName", "age");
+        lineTokenizer.setNames("uid", "firstName", "lastName", "age");
 
         BeanWrapperFieldSetMapper<Student> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
         fieldSetMapper.setTargetType(Student.class);
@@ -208,6 +216,66 @@ public class SpringBatchConfig {
         lineMapper.setFieldSetMapper(fieldSetMapper);
         return lineMapper;
     }
+
+    @Bean
+    public Step step2() {
+        return new StepBuilder("importFixedLengthTxt", jobRepository)
+                .<Student, Student>chunk(1000, platformTransactionManager)
+                .reader(fixedLengthReader())
+                .processor(processor())
+                .writer(writer())
+                .listener(stepCompletionListener())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean("studentFixedLengthJob")
+    public Job runJob2() {
+        return new JobBuilder("importStudentsFixedLength", jobRepository)
+                .start(step2())
+                .listener(jobCompletionListener())
+                .build();
+
+    }
+
+    @Bean
+    public FlatFileItemReader<Student> fixedLengthReader() {
+        FlatFileItemReader<Student> itemReader = new FlatFileItemReader<>();
+        itemReader.setResource(new FileSystemResource("src/main/resources/students-fixed-length.txt"));
+        itemReader.setName("fixedLengthReader");
+        //itemReader.setLinesToSkip(1);
+        itemReader.setLineMapper(fixedLengthLineMapper());
+        return itemReader;
+    }
+
+    private LineMapper<Student> fixedLengthLineMapper() {
+        DefaultLineMapper<Student> lineMapper = new DefaultLineMapper<>();
+
+        // FixedLengthTokenizer to define field lengths
+        FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
+        tokenizer.setNames("uid", "firstName", "lastName", "age");
+
+        // Set column lengths for each field (example values)
+        tokenizer.setColumns(
+                new Range(1, 5),    // uid (5 characters)
+                new Range(6, 25),   // firstName (20 characters)
+                new Range(26, 45),  // lastName (20 characters)
+                new Range(46, 48)   // age (3 characters)
+        );
+
+        // Optionally, specify the padding character (default is a space)
+        tokenizer.setStrict(false); // Allow shorter lines
+        //tokenizer.setPaddingCharacter(' '); // Define the padding character
+
+        BeanWrapperFieldSetMapper<Student> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(Student.class);
+
+        lineMapper.setLineTokenizer(tokenizer);
+        lineMapper.setFieldSetMapper(fieldSetMapper);
+
+        return lineMapper;
+    }
+
 
     @Bean("jobLauncherTaskExecutor")
     public TaskExecutor jobLauncherTaskExecutor() {
