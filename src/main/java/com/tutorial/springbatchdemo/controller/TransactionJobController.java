@@ -15,7 +15,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/load")
-public class JobTriggerController {
+public class TransactionJobController {
     @Autowired
     private JobLauncher jobLauncher;
 

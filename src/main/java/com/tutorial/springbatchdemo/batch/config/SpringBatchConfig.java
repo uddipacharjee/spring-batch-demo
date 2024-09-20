@@ -13,7 +13,10 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.RepositoryItemWriter;
@@ -34,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -203,6 +207,25 @@ public class SpringBatchConfig {
         lineMapper.setLineTokenizer(lineTokenizer);
         lineMapper.setFieldSetMapper(fieldSetMapper);
         return lineMapper;
+    }
+
+    @Bean("jobLauncherTaskExecutor")
+    public TaskExecutor jobLauncherTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(10);  // Adjust pool size according to your needs
+        taskExecutor.setMaxPoolSize(20);
+        taskExecutor.setQueueCapacity(50);
+        taskExecutor.setThreadNamePrefix("Async-Job-");
+        taskExecutor.initialize();
+        return taskExecutor;
+    }
+
+    @Bean("asyncJobLauncher")
+    public JobLauncher asyncJobLauncher(JobRepository jobRepository,@Qualifier("jobLauncherTaskExecutor") TaskExecutor taskExecutor) {
+        TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
+        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setTaskExecutor(taskExecutor); // Set async TaskExecutor
+        return jobLauncher;
     }
 
 

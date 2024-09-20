@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/students")
 @RequiredArgsConstructor
-public class StudentController {
+public class StudentJobController {
 
     private final JobLauncher jobLauncher;
     @Autowired
-    private  @Qualifier("studentJob") Job job;
+    private @Qualifier("studentJob") Job job;
 
     @PostMapping
     public void importCsvToDBJob() {
