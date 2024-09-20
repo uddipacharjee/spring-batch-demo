@@ -44,8 +44,9 @@ public class StudentFileReader {
     @Bean("csvReader")
     public FlatFileItemReader<Student> reader() {
         FlatFileItemReader<Student> itemReader = new FlatFileItemReader<>();
-        itemReader.setResource(new FileSystemResource(csvFileInput));
+        itemReader.setResource(new FileSystemResource("src/main/resources/"+csvFileInput));
         itemReader.setName("csvReader");
+        itemReader.setStrict(false);
         itemReader.setLinesToSkip(1);
         itemReader.setLineMapper(lineMapper());
         return itemReader;
