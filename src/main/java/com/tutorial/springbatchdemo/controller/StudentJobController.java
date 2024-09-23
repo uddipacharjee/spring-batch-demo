@@ -1,5 +1,6 @@
 package com.tutorial.springbatchdemo.controller;
 
+import com.tutorial.springbatchdemo.util.BeanNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -22,7 +23,7 @@ public class StudentJobController {
 
     private final JobLauncher jobLauncher;
     @Autowired
-    private @Qualifier("studentJob") Job job;
+    private @Qualifier(BeanNames.Job.STUDENT_CSV) Job job;
 
     @PostMapping
     public void importCsvToDBJob() {

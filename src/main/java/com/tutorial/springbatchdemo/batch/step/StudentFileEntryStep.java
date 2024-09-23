@@ -3,6 +3,7 @@ package com.tutorial.springbatchdemo.batch.step;
 import com.tutorial.springbatchdemo.batch.processor.StudentProcessor;
 import com.tutorial.springbatchdemo.listener.CustomStepExecutionListener;
 import com.tutorial.springbatchdemo.model.Student;
+import com.tutorial.springbatchdemo.util.BeanNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -16,6 +17,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static com.tutorial.springbatchdemo.util.BeanNames.Reader.STUDENT_CSV_READER;
+import static com.tutorial.springbatchdemo.util.BeanNames.Reader.STUDENT_FIXED_LENGTH_READER;
+import static com.tutorial.springbatchdemo.util.BeanNames.Writer.STUDENT_REPOSITORY_WRITER;
+
 @Configuration
 @RequiredArgsConstructor
 public class StudentFileEntryStep {
@@ -28,9 +33,9 @@ public class StudentFileEntryStep {
     @Qualifier("StepTaskExecutor")
     private TaskExecutor stepTaskExecutor;
 
-    @Bean("studentFixedLengthStep")
-    public Step step2(@Qualifier("studentFixedLengthReader") FlatFileItemReader<Student> reader,
-                      @Qualifier("studentRepositoryWriter") RepositoryItemWriter<Student> writer) {
+    @Bean(BeanNames.Step.STUDENT_FIXED_LENGTH_STEP)
+    public Step step2(@Qualifier(STUDENT_FIXED_LENGTH_READER) FlatFileItemReader<Student> reader,
+                      @Qualifier(STUDENT_REPOSITORY_WRITER) RepositoryItemWriter<Student> writer) {
         return new StepBuilder("importFixedLengthTxt", jobRepository)
                 .<Student, Student>chunk(1000, platformTransactionManager)
                 .reader(reader)
@@ -41,9 +46,9 @@ public class StudentFileEntryStep {
                 .build();
     }
 
-    @Bean("csvStudentFileStep")
-    public Step step1(@Qualifier("csvReader") FlatFileItemReader<Student> reader,
-                      @Qualifier("studentRepositoryWriter") RepositoryItemWriter<Student> writer) {
+    @Bean(BeanNames.Step.STUDENT_CSV_STUDENT_STEP)
+    public Step step1(@Qualifier(STUDENT_CSV_READER) FlatFileItemReader<Student> reader,
+                      @Qualifier(STUDENT_REPOSITORY_WRITER) RepositoryItemWriter<Student> writer) {
         return new StepBuilder("csvImport", jobRepository)
                 .<Student, Student>chunk(1000, platformTransactionManager)
                 .reader(reader)

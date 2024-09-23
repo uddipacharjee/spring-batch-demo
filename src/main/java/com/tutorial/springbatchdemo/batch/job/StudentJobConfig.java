@@ -6,6 +6,7 @@ import com.tutorial.springbatchdemo.listener.CustomStepExecutionListener;
 import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
 import com.tutorial.springbatchdemo.model.Student;
 import com.tutorial.springbatchdemo.repository.StudentRepository;
+import com.tutorial.springbatchdemo.util.BeanNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -40,7 +41,7 @@ public class StudentJobConfig {
     private final JobCompletionNotificationListener jobCompletionNotificationListener;
 
 
-    @Bean("studentFixedLengthJob")
+    @Bean(BeanNames.Job.STUDENT_FIXED_LENGTH)
     public Job runJob2(@Qualifier("studentFixedLengthStep") Step step) {
         return new JobBuilder("importStudentsFixedLength", jobRepository)
                 .start(step)
@@ -50,16 +51,10 @@ public class StudentJobConfig {
     }
 
 
-    @Bean("studentJob")
+    @Bean(BeanNames.Job.STUDENT_CSV)
     public Job runJob(@Qualifier("csvStudentFileStep") Step step) {
         return new JobBuilder("importStudentsCSV", jobRepository)
                 .start(step)
                 .build();
-
     }
-
-
-
-
-
 }

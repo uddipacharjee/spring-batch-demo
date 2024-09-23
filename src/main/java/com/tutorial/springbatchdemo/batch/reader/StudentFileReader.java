@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
+import static com.tutorial.springbatchdemo.util.BeanNames.Reader.STUDENT_CSV_READER;
+import static com.tutorial.springbatchdemo.util.BeanNames.Reader.STUDENT_FIXED_LENGTH_READER;
+
 @Configuration
 @RequiredArgsConstructor
 public class StudentFileReader {
@@ -26,7 +29,7 @@ public class StudentFileReader {
     private String csvFileInput;
 
 
-    @Bean("studentFixedLengthReader")
+    @Bean(STUDENT_FIXED_LENGTH_READER )
     public FlatFileItemReader<Student> studentFixedLengthReader() {
         return readerFactory.createFixedLengthReader(
                 fixedLengthFileInput,
@@ -41,7 +44,7 @@ public class StudentFileReader {
         );
     }
 
-    @Bean("csvReader")
+    @Bean(STUDENT_CSV_READER)
     public FlatFileItemReader<Student> reader() {
         FlatFileItemReader<Student> itemReader = new FlatFileItemReader<>();
         itemReader.setResource(new FileSystemResource("src/main/resources/"+csvFileInput));
