@@ -23,7 +23,7 @@ public class TransactionLogWriter {
         String sql = "INSERT INTO account_info (operation,txn_id,from_account,to_account,amount,date) " +
                 "VALUES (:operation,:transactionId, :fromAccount,:toAccount,:amount,:date)";
         return new JdbcBatchItemWriterBuilder<AccountInfo>()
-                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AccountInfo>())
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
                 .sql(sql)
                 .dataSource(dataSource)
                 .build();
@@ -33,7 +33,7 @@ public class TransactionLogWriter {
     public JdbcBatchItemWriter<AccountInfo> txnStatusUpdateJDBCWriter(DataSource dataSource) {
         String sql = "UPDATE txn_log set status = '10' where txn_id=:transactionId;";
         return new JdbcBatchItemWriterBuilder<AccountInfo>()
-                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AccountInfo>())
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
                 .sql(sql)
                 .dataSource(dataSource)
                 .build();
@@ -41,7 +41,7 @@ public class TransactionLogWriter {
 
     @Bean(COMPOSITE_ITEM_WRITER)
     public CompositeItemWriter<AccountInfo> compositeItemWriter(DataSource dataSource) {
-        CompositeItemWriter writer = new CompositeItemWriter();
+        CompositeItemWriter<AccountInfo> writer = new CompositeItemWriter<>();
         writer.setDelegates(Arrays.asList(accountInfoJDBCWriter(dataSource), txnStatusUpdateJDBCWriter(dataSource)));
         return writer;
     }

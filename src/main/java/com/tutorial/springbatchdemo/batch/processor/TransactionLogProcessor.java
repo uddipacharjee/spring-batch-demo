@@ -40,7 +40,7 @@ public class TransactionLogProcessor implements ItemProcessor<TransactionLog, Ac
             toAcc = "SALE_DEPOSIT";
         }
 
-        AccountInfo accountInfo = AccountInfo.builder()
+        return AccountInfo.builder()
                 .operation(item.getOperation())
                 .transactionId(item.getTxnId())
                 .fromAccount(fromAcc)
@@ -48,6 +48,5 @@ public class TransactionLogProcessor implements ItemProcessor<TransactionLog, Ac
                 .amount(item.getAmount())
                 .date(item.getDate())
                 .build();
-        return accountInfo;
     }
 }
