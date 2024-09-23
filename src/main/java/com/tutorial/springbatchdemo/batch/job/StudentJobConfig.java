@@ -42,7 +42,7 @@ public class StudentJobConfig {
 
 
     @Bean(BeanNames.Job.STUDENT_FIXED_LENGTH)
-    public Job runJob2(@Qualifier("studentFixedLengthStep") Step step) {
+    public Job runJob2(@Qualifier(BeanNames.Step.STUDENT_FIXED_LENGTH_STEP) Step step) {
         return new JobBuilder("importStudentsFixedLength", jobRepository)
                 .start(step)
                 .listener(jobCompletionNotificationListener)
@@ -52,7 +52,7 @@ public class StudentJobConfig {
 
 
     @Bean(BeanNames.Job.STUDENT_CSV)
-    public Job runJob(@Qualifier("csvStudentFileStep") Step step) {
+    public Job runJob(@Qualifier(BeanNames.Step.STUDENT_CSV_STUDENT_STEP) Step step) {
         return new JobBuilder("importStudentsCSV", jobRepository)
                 .start(step)
                 .build();

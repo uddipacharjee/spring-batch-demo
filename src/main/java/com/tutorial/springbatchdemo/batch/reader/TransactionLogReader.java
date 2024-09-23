@@ -10,13 +10,15 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
+import static com.tutorial.springbatchdemo.util.BeanNames.Reader.TRANSACTION_LOG_CURSOR_READER;
+
 @Configuration
 @RequiredArgsConstructor
 public class TransactionLogReader {
     @Autowired
     private DataSource dataSource;
 
-    @Bean("transactionLogCursorItemReader")
+    @Bean(TRANSACTION_LOG_CURSOR_READER)
     public JdbcCursorItemReader<TransactionLog> transactionLogCursorItemReader() {
         JdbcCursorItemReader<TransactionLog> reader = new JdbcCursorItemReader<>();
         reader.setSql("SELECT txn_id, date, operation, user_name,amount, status FROM txn_log" +

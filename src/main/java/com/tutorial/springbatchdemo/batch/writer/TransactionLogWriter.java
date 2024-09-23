@@ -12,11 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 import java.util.Arrays;
 
+import static com.tutorial.springbatchdemo.util.BeanNames.Writer.*;
+
 @Configuration
 @RequiredArgsConstructor
 public class TransactionLogWriter {
 
-    @Bean("accountInfoJDBCWriter")
+    @Bean(ACCOUNT_INFO_JDBC_WRITER)
     public JdbcBatchItemWriter<AccountInfo> accountInfoJDBCWriter(DataSource dataSource) {
         String sql = "INSERT INTO account_info (operation,txn_id,from_account,to_account,amount,date) " +
                 "VALUES (:operation,:transactionId, :fromAccount,:toAccount,:amount,:date)";
@@ -27,7 +29,7 @@ public class TransactionLogWriter {
                 .build();
     }
 
-    @Bean("txnStatusUpdateJDBCWriter")
+    @Bean(TXN_UPDATE_JDBC_WRITER)
     public JdbcBatchItemWriter<AccountInfo> txnStatusUpdateJDBCWriter(DataSource dataSource) {
         String sql = "UPDATE txn_log set status = '10' where txn_id=:transactionId;";
         return new JdbcBatchItemWriterBuilder<AccountInfo>()
@@ -37,7 +39,7 @@ public class TransactionLogWriter {
                 .build();
     }
 
-    @Bean("compositeItemWriter")
+    @Bean(COMPOSITE_ITEM_WRITER)
     public CompositeItemWriter<AccountInfo> compositeItemWriter(DataSource dataSource) {
         CompositeItemWriter writer = new CompositeItemWriter();
         writer.setDelegates(Arrays.asList(accountInfoJDBCWriter(dataSource), txnStatusUpdateJDBCWriter(dataSource)));

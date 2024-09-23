@@ -10,8 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.tutorial.springbatchdemo.util.BeanNames.Processor.TRANSACTION_LOG_PROCESSOR;
+
 @Slf4j
-@Component("transactionLogProcessor")
+@Component(TRANSACTION_LOG_PROCESSOR)
 public class TransactionLogProcessor implements ItemProcessor<TransactionLog, AccountInfo> {
 
     private static final Map<Integer, String> OPERATION = new HashMap<>();

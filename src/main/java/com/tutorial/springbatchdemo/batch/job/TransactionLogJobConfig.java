@@ -35,6 +35,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.util.Arrays;
 
+import static com.tutorial.springbatchdemo.util.BeanNames.Job.*;
+
 @Configuration
 //@EnableBatchProcessing
 @RequiredArgsConstructor
@@ -48,7 +50,7 @@ public class TransactionLogJobConfig {
 
 
 
-    @Bean("transactionLogHandlerJob")
+    @Bean(TRANSACTION_LOG_HANDLER)
     public Job transactionLogHandlerJob(
             @Qualifier("randomGeneratorStep") Step randomGeneratorStep,
             @Qualifier("transactionLogStep") Step transactionLogStep) {
@@ -61,7 +63,7 @@ public class TransactionLogJobConfig {
                 .build();
     }
 
-    @Bean("randTransactionGenJob")
+    @Bean(RANDOM_TRANSACTION_GENERATOR)
     public Job randTransactionGenJob(
             @Qualifier("randomGeneratorStep") Step randomGeneratorStep) {
 
@@ -72,7 +74,7 @@ public class TransactionLogJobConfig {
                 .build();
     }
 
-    @Bean("randTransactionProcessJob")
+    @Bean(RANDOM_TRANSACTION_PROCESS)
     public Job randTransactionProcessJob(
             @Qualifier("transactionLogStep") Step transactionLogStep) {
 
