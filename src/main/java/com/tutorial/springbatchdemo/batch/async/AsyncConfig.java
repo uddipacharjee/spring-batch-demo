@@ -36,10 +36,11 @@ public class AsyncConfig {
 
 
     @Bean("asyncJobLauncher")
-    public JobLauncher asyncJobLauncher(JobRepository jobRepository, @Qualifier("jobLauncherTaskExecutor") TaskExecutor taskExecutor) {
+    public JobLauncher asyncJobLauncher(@Qualifier("jp")JobRepository jobRepository, @Qualifier("jobLauncherTaskExecutor") TaskExecutor taskExecutor) throws Exception {
         TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
         jobLauncher.setJobRepository(jobRepository);
         jobLauncher.setTaskExecutor(taskExecutor); // Set async TaskExecutor
+        jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }
 

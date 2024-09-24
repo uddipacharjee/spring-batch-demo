@@ -1,7 +1,7 @@
 package com.tutorial.springbatchdemo.batch.step;
 
 import com.tutorial.springbatchdemo.batch.processor.StudentProcessor;
-import com.tutorial.springbatchdemo.listener.CustomStepExecutionListener;
+import com.tutorial.springbatchdemo.batch.listener.CustomStepExecutionListener;
 import com.tutorial.springbatchdemo.model.Student;
 import com.tutorial.springbatchdemo.util.BeanNames;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,15 @@ public class StudentFileEntryStep {
     public Step step2(@Qualifier(STUDENT_FIXED_LENGTH_READER) FlatFileItemReader<Student> reader,
                       @Qualifier(STUDENT_REPOSITORY_WRITER) RepositoryItemWriter<Student> writer) {
         return new StepBuilder("importFixedLengthTxt", jobRepository)
-                .<Student, Student>chunk(1000, platformTransactionManager)
+                .<Student, Student>chunk(100, platformTransactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .faultTolerant()
+                .retryLimit(3) // Retry failed operations up to 3 times
+                .retry(Exception.class) // Retry on exceptions
+                //.skipLimit(5) // Skip up to 5 items before failing the step
+                //.skip(Exception.class) //
                 .listener(stepExecutionListener)
                 .taskExecutor(stepTaskExecutor)
                 .build();

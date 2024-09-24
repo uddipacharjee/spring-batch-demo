@@ -1,6 +1,6 @@
 package com.tutorial.springbatchdemo.batch.job;
 
-import com.tutorial.springbatchdemo.listener.JobCompletionNotificationListener;
+import com.tutorial.springbatchdemo.batch.listener.JobCompletionNotificationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

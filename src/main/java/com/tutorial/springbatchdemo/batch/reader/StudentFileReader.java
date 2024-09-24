@@ -32,7 +32,7 @@ public class StudentFileReader {
     @Bean(STUDENT_FIXED_LENGTH_READER )
     public FlatFileItemReader<Student> studentFixedLengthReader() {
         return readerFactory.createFixedLengthReader(
-                fixedLengthFileInput,
+                "src/main/resources/"+ fixedLengthFileInput,
                 Student.class,
                 new String[]{"uid", "firstName", "lastName", "age"},
                 new Range[]{
