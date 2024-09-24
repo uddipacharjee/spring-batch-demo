@@ -4,25 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -34,9 +27,9 @@ public class JobController {
     private JobRegistry jobRegistry;
     @Autowired
     private @Qualifier("asyncJobLauncher") JobLauncher jobLauncher;
-@Autowired
+    @Autowired
     private  JobExplorer jobExplorer;
-@Autowired
+    @Autowired
     private  JobOperator jobOperator;
 
     @GetMapping("/list")
@@ -88,10 +81,7 @@ public class JobController {
         }
     }
     @GetMapping("/restart/{jobName}")
-    public void restart(@PathVariable String jobName) throws JobInstanceAlreadyCompleteException,
-            JobExecutionAlreadyRunningException,
-            JobParametersInvalidException,
-            JobRestartException, NoSuchJobException {
+    public void restart(@PathVariable String jobName) throws NoSuchJobException {
 
             Job job = jobRegistry.getJob(jobName);
 
@@ -119,5 +109,32 @@ public class JobController {
             //JobExecution execution = jobLauncher.run(job, jobParameters);
             //System.out.println("STATUS :: " + execution.getStatus());
     }
+
+    @PostMapping("/stop-job/{jobName}")
+    public void stopJob(@PathVariable String jobName) {
+        // Retrieve the last job instance
+        JobInstance lastInstance = this.jobExplorer.getLastJobInstance(jobName);
+        if (lastInstance == null) {
+            log.warn("No job instance found for job: {}", jobName);
+            return;
+        }
+
+        // Retrieve the last job execution
+        JobExecution lastExecution = this.jobExplorer.getLastJobExecution(lastInstance);
+        if (lastExecution == null || lastExecution.isStopping() || lastExecution.getStatus() == BatchStatus.STOPPED) {
+            log.warn("Job execution is already stopped or stopping for job: {}", jobName);
+            return;
+        }
+
+        // Stop the job execution
+        try {
+            log.info("Attempting to stop job execution with ID: {}", lastExecution.getId());
+            this.jobOperator.stop(lastExecution.getId());
+            log.info("Job {} is being stopped.", jobName);
+        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+            log.error("Error stopping job: {}", jobName, e);
+        }
+    }
+
 
 }

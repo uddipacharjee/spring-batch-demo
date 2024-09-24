@@ -36,10 +36,10 @@ public class StudentFileReader {
                 Student.class,
                 new String[]{"uid", "firstName", "lastName", "age"},
                 new Range[]{
-                        new Range(1, 5),    // uid (5 characters)
-                        new Range(6, 25),   // firstName (20 characters)
-                        new Range(26, 45),  // lastName (20 characters)
-                        new Range(46, 48)   // age (3 characters)
+                        new Range(1, 7),    // uid (5 characters)
+                        new Range(8, 27),   // firstName (20 characters)
+                        new Range(28, 47),  // lastName (20 characters)
+                        new Range(48, 50)   // age (3 characters)
                 }
         );
     }

@@ -47,7 +47,7 @@ public class StudentFileEntryStep {
                 //.skipLimit(5) // Skip up to 5 items before failing the step
                 //.skip(Exception.class) //
                 .listener(stepExecutionListener)
-                .taskExecutor(stepTaskExecutor)
+                //.taskExecutor(stepTaskExecutor)
                 .build();
     }
 
