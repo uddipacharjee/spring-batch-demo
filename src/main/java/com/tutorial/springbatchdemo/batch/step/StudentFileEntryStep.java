@@ -10,6 +10,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,7 @@ public class StudentFileEntryStep {
     private TaskExecutor stepTaskExecutor;
 
     @Bean(BeanNames.Step.STUDENT_FIXED_LENGTH_STEP)
-    public Step step2(@Qualifier(STUDENT_FIXED_LENGTH_READER) FlatFileItemReader<Student> reader,
+    public Step step2(@Qualifier(STUDENT_FIXED_LENGTH_READER) SynchronizedItemStreamReader<Student> reader,
                       @Qualifier(STUDENT_REPOSITORY_WRITER) RepositoryItemWriter<Student> writer) {
         return new StepBuilder("importFixedLengthTxt", jobRepository)
                 .<Student, Student>chunk(100, platformTransactionManager)
@@ -47,7 +48,7 @@ public class StudentFileEntryStep {
                 //.skipLimit(5) // Skip up to 5 items before failing the step
                 //.skip(Exception.class) //
                 .listener(stepExecutionListener)
-                //.taskExecutor(stepTaskExecutor)
+                .taskExecutor(stepTaskExecutor)
                 .build();
     }
 

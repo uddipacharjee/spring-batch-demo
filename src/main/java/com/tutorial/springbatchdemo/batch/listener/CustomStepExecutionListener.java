@@ -13,12 +13,18 @@ public class CustomStepExecutionListener implements StepExecutionListener {
     public void beforeStep(StepExecution stepExecution) {
 
         log.info("Before step: {}", stepExecution.getStepName());
+        log.info("Initial ExecutionContext: {}", stepExecution.getExecutionContext());
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
 
         log.info("After step: {}", stepExecution.getStepName());
-        return ExitStatus.COMPLETED;
+        log.info("ExecutionContext after step: {}", stepExecution.getExecutionContext());
+        log.info("Read count: {}, Write count: {}, Skip count: {}",
+                stepExecution.getReadCount(),
+                stepExecution.getWriteCount(),
+                stepExecution.getSkipCount());
+        return stepExecution.getExitStatus();
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -26,7 +27,7 @@ public class AsyncConfig {
     @Bean("StepTaskExecutor")
     public TaskExecutor stepTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);  // Minimum number of threads to keep in the pool
+        executor.setCorePoolSize(5);  // Minimum number of threads to keep in the pool
         executor.setMaxPoolSize(50);   // Maximum number of threads to create
         executor.setQueueCapacity(100);  // Queue size for tasks waiting for an available thread
         executor.setThreadNamePrefix("StepTaskExecutor-");

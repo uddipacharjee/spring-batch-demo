@@ -2,12 +2,15 @@ package com.tutorial.springbatchdemo.batch.reader;
 
 import com.tutorial.springbatchdemo.model.Student;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.Range;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,18 +33,25 @@ public class StudentFileReader {
 
 
     @Bean(STUDENT_FIXED_LENGTH_READER )
-    public FlatFileItemReader<Student> studentFixedLengthReader() {
-        return readerFactory.createFixedLengthReader(
+    @StepScope
+    public SynchronizedItemStreamReader<Student> studentFixedLengthReader() {
+        FlatFileItemReader<Student> reader =  readerFactory.createFixedLengthReader(
                 "src/main/resources/"+ fixedLengthFileInput,
                 Student.class,
                 new String[]{"uid", "firstName", "lastName", "age"},
                 new Range[]{
-                        new Range(1, 7),    // uid (5 characters)
-                        new Range(8, 27),   // firstName (20 characters)
-                        new Range(28, 47),  // lastName (20 characters)
-                        new Range(48, 50)   // age (3 characters)
+                        new Range(1, 5),    // uid (5 characters)
+                        new Range(6, 25),   // firstName (20 characters)
+                        new Range(26, 45),  // lastName (20 characters)
+                        new Range(46, 48)   // age (3 characters)
                 }
         );
+        reader.setSaveState(true);  // Ensure state is saved for checkpointing
+        reader.setStrict(false);    // Avoid exceptions for missing lines
+
+        return new SynchronizedItemStreamReaderBuilder<Student>()
+                .delegate(reader)  // Delegate to the FlatFileItemReader
+                .build();
     }
 
     @Bean(STUDENT_CSV_READER)
