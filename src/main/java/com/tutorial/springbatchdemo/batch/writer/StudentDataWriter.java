@@ -18,7 +18,7 @@ public class StudentDataWriter {
     public RepositoryItemWriter<Student> writer() {
         RepositoryItemWriter<Student> writer = new RepositoryItemWriter<>();
         writer.setRepository(repository);
-        writer.setMethodName("save");
+        //writer.setMethodName("save");
         return writer;
     }
 }

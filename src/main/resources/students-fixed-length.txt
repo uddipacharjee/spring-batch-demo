@@ -2,8 +2,8 @@
 00002Bob                 Wilson              17 
 00003Chris               Adams               25 
 00004Kevin               Clark               21 
-00005Eve                 King                19 
-00006Kevin               Green               22 
+00005Eve                 King                19
+00006Kevin               Green               22
 00007David               Evans               21 
 00008Jane                Black               19 
 00009George              Young               21 
@@ -313,7 +313,7 @@
 00313Jane                Scott               21 
 00314John                Hill                25 
 00315James               Evans               17 
-00316Nancy               Doe                 18
+00316Nobita              sujuki              12
 00317Laura               Wilson              17 
 00318Laura               Smith               19 
 00319Laura               Wilson              17 
